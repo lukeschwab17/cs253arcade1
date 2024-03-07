@@ -2,7 +2,7 @@
 {% block head %}
     <script>
         let guesses = 0;
-        let word = 'earth';
+        let word = null;
         function guessWord(form) {
             let inputValue = form.guess.value;
 
@@ -11,14 +11,14 @@
                 return false;
             }
             guesses++;
+            form.guess.value = "";
             renderRow(inputValue);
 
         }
 
         function renderRow(guess) {
+            word = document.getElementById('word').value.toUpperCase();
             guess = guess.toUpperCase();
-            word = word.toUpperCase();
-
             let temp_word = word; // Keeps track of correctly guessed yellow/green
             let current_col = 1;
             let row = document.getElementById(`row-${guesses}`);
@@ -126,6 +126,7 @@
             form.action = '{{ url_for('wordle_win') }}';
 
             guesses_data.value = guesses;
+            guesses_data.type = 'hidden';
             guesses_data.name = 'total-guesses';
 
             form.appendChild(guesses_data);
@@ -138,7 +139,7 @@
     </script>
 {% endblock %}
 {% block content %}
-    <div class="row text-centered"><h1 class="title">WORDLE</h1></div>
+    <div class="row justify-content-md-center mb-4"><h1 class="title">WORDLE</h1></div>
 
     {% for num in [1, 2, 3, 4, 5] %}
         <div class="row justify-content-md-center mb-2" id="row-{{ num }}">
@@ -158,6 +159,7 @@
         </form>
     </div>
 
+    <input type="hidden" id="word" value="{{ word }}">
 {% endblock %}
 
 
