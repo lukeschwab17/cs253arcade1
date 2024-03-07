@@ -1,0 +1,163 @@
+{% extends "layout.html" %}
+{% block head %}
+    <script>
+        let guesses = 0;
+        let word = 'earth';
+        function guessWord(form) {
+            let inputValue = form.guess.value;
+
+            if(inputValue.length != 5) {
+                alert (`You typed a non-five letter word: ${inputValue}. Please try again.`);
+                return false;
+            }
+            guesses++;
+            renderRow(inputValue);
+
+        }
+
+        function renderRow(guess) {
+            guess = guess.toUpperCase();
+            word = word.toUpperCase();
+
+            let temp_word = word; // Keeps track of correctly guessed yellow/green
+            let current_col = 1;
+            let row = document.getElementById(`row-${guesses}`);
+            let col = row.querySelector(`#row-${guesses}-col-${current_col}`);
+            let btn = col.querySelector('.btn');
+
+            // green letters
+            for (let i = 0; i < 5; ++i) {
+                col = row.querySelector(`#row-${guesses}-col-${i + 1}`);
+                btn = col.querySelector('.btn');
+
+                // correct char
+                if (guess.charAt(i) == word.charAt(i)) {
+                    temp_word = temp_word.replace(guess.charAt(i), "");
+                    btn.classList.add('btn-success');
+                    btn.textContent = guess.charAt(i);
+                }
+            }
+
+            // wait until after all green filled to handle win
+            if (guess == word) {
+                win();
+                return false;
+            }
+
+            // yellow letters
+            for (let i = 0; i < 5; ++i) {
+                col = row.querySelector(`#row-${guesses}-col-${i + 1}`);
+                btn = col.querySelector('.btn');
+
+                // in word but not right spot
+                if (temp_word.indexOf(guess.charAt(i)) > -1 && guess.charAt(i) != word.charAt(i)) {
+                    temp_word = temp_word.replace(guess.charAt(i), "");
+                    btn.classList.add('btn-warning');
+                    btn.textContent = guess.charAt(i);
+                }
+
+                // if green/yellow exhausted of that char, should be gray
+                else if (word.indexOf(guess.charAt(i)) != -1 && guess.charAt(i) != word.charAt(i) && temp_word.indexOf(guess.charAt(i)) == -1) {
+                    btn.classList.add('btn-dark');
+                    btn.textContent = guess.charAt(i);
+                }
+            }
+
+            // gray (wrong) letters
+            for (let i = 0; i < 5; ++i) {
+                col = row.querySelector(`#row-${guesses}-col-${i + 1}`);
+                btn = col.querySelector('.btn');
+
+                // not in word
+                if (word.indexOf(guess.charAt(i)) == -1) {
+                    btn.classList.add('btn-dark');
+                    btn.textContent = guess.charAt(i);
+                }
+            }
+            // 5 guesses, win condition not met
+            if (guesses == 5) {
+                lose();
+            }
+        }
+
+        // loses game
+        function lose() {
+            guesses = 0;
+            alert(`You lose! The word was: ${word}`);
+
+            let row = document.getElementById('row-bottom');
+
+            document.getElementById('guess-form').style.display = "none";
+
+            let button = document.createElement('button');
+            button.classList.add("btn");
+            button.classList.add("btn-danger");
+            button.onclick = function reload() { window.location.href=window.location.href; }
+            button.textContent = "Restart";
+
+            row.appendChild(button);
+        }
+        // removes entry form, 'ending' the game
+        function win() {
+            alert(`You win! The word was: ${word}`)
+
+            let row = document.getElementById('row-bottom');
+
+            document.getElementById('guess-form').style.display = "none";
+
+            let button = document.createElement('button');
+            button.classList.add("btn");
+            button.classList.add("btn-success");
+            button.onclick = submit_win;
+            button.textContent = "Leaderboard";
+
+            row.appendChild(button);
+        }
+
+        // opens leaderboard page for user submission
+        function submit_win() {
+            // https://stackoverflow.com/questions/13001830/creating-and-submitting-a-form-with-javascript
+            // seemed better than an invisible form that we have done before in class
+
+            let form = document.createElement('form');
+            let guesses_data = document.createElement('input');
+
+            form.method = 'POST';
+            form.action = '{{ url_for('wordle_win') }}';
+
+            guesses_data.value = guesses;
+            guesses_data.name = 'total-guesses';
+
+            form.appendChild(guesses_data);
+
+            document.body.appendChild(form);
+
+            form.submit();
+        }
+
+    </script>
+{% endblock %}
+{% block content %}
+    <div class="row text-centered"><h1 class="title">WORDLE</h1></div>
+
+    {% for num in [1, 2, 3, 4, 5] %}
+        <div class="row justify-content-md-center mb-2" id="row-{{ num }}">
+            {% for num_inner in [1, 2, 3, 4, 5] %}
+                <div class="col-sm-1" id="row-{{ num }}-col-{{ num_inner }}">
+                    <button type="button" class="btn btn-secondary" disabled>-</button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endfor %}
+
+    <div class="row justify-content-center m-4" id="row-bottom">
+        <form name="guess-form" id="guess-form" onsubmit="guessWord(this); return false;">
+            <label>Enter your guess:</label>
+            <input type="text" name="guess" value="">
+            <input type="submit" name="button" value="Submit">
+        </form>
+    </div>
+
+{% endblock %}
+
+

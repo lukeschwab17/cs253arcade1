@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, render_template, session, redirect, url_for
+from flask import Flask, request, jsonify, render_template, session, redirect, url_for, flash
 import sqlite3
 from random import randint
 
@@ -21,6 +21,14 @@ def init_db():
             score INTEGER
         )
     ''')
+
+    db.execute('''
+        CREATE TABLE IF NOT EXISTS wordle_high_scores (
+            id INTEGER PRIMARY KEY,
+            name TEXT,
+            score INTEGER
+            )''')
+
     db.commit()
     db.close()
 
@@ -119,6 +127,20 @@ def hilo_guess():
                            number_second = number_second,
                            result = result)
 
+@app.route('/wordle')
+def wordle():
+    return render_template('wordle.html')
+
+@app.route('/wordle-win', methods=['POST'])
+def wordle_win():
+    try:
+        guesses = int(request.form['total-guesses'])
+    except:
+        flash('Invalid guesses data.')
+        return redirect(url_for('wordle'))
+
+
+    return render_template('wordle_board.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
