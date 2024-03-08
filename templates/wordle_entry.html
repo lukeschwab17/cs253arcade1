@@ -1,0 +1,35 @@
+{% extends "layout.html" %}
+
+{% block title %}WORDLE Board{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1>WORDLE OVER</h1>
+        <div class="alert alert-info p-2" role="alert">
+            Guesses = {{ guesses }}
+        </div>
+    </div>
+    <div>
+        <h2>Top 10 Scores</h2>
+        <ul class="list-group">
+            {% for score in top_scores %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    {{ score.name }}
+                    <span class="badge badge-primary badge-pill">{{ score.score }}</span>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div id="enter initials">
+        <form action="/add_score_wordle" method="POST">
+            <input type="hidden" name="game" value="wordle">
+            <input type="hidden" name="score" value="{{ guesses }}">
+            <input type="text" name="name" placeholder="Enter your name" required>
+            <button type="submit">Submit</button>
+        </form>
+        <div id="responseMessage"></div>
+    </div>
+<a href="{{ url_for('wordle') }}" class="btn btn-primary">Start New Game</a>
+{% endblock %}
