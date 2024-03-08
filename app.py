@@ -49,7 +49,7 @@ def add_score(name, score):
 
 def get_high_scores(limit=10):
     conn = get_db_connection()
-    scores = conn.execute('SELECT name, MAX(score) AS score FROM high_scores GROUP BY name ORDER BY score DESC LIMIT ?', (limit,)).fetchall()
+    scores = conn.execute('SELECT name, MAX(score) AS score FROM high_scores GROUP BY name ORDER BY MAX(score) DESC LIMIT ?', (limit,)).fetchall()
     conn.close()
     return scores
 
