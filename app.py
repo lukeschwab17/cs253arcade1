@@ -7,7 +7,6 @@ app.secret_key = 'your_secret_key' # Required for session management
 
 DATABASE = 'highscores.db'
 
-
 def get_db_connection():
     conn = sqlite3.connect(DATABASE)
     conn.row_factory = sqlite3.Row
