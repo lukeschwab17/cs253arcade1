@@ -3,9 +3,10 @@ import sqlite3
 import random
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key' # Required for session management
+app.secret_key = 'your_secret_key'  # Required for session management
 
 DATABASE = 'highscores.db'
+
 
 def get_db_connection():
     conn = sqlite3.connect(DATABASE)
@@ -20,7 +21,15 @@ def init_db():
             id INTEGER PRIMARY KEY, 
             name TEXT, 
             score INTEGER
-        )
+            
+        ); 
+    ''')
+    db.execute('''
+    CREATE TABLE IF NOT EXISTS snake_scores (
+            id INTEGER PRIMARY KEY, 
+            name TEXT, 
+            score INTEGER
+        );
     ''')
 
     db.execute('''
@@ -53,6 +62,25 @@ def get_high_scores(limit=10):
     return scores
 
 
+def snake_add_score(name, score):
+    conn = get_db_connection()
+    conn.execute('INSERT INTO snake_scores (name, score) VALUES (?, ?)', (name, score))
+    conn.commit()
+    conn.close()
+
+
+def snake_get_high_scores(limit=10):
+    conn = get_db_connection()
+    scores = conn.execute('SELECT name, MAX(score) AS score FROM snake_scores GROUP BY name ORDER BY MAX(score) DESC LIMIT ?', (limit,)).fetchall()
+    conn.close()
+    return scores
+
+
+@app.route('/snake_high_scores', methods=['GET'])
+def snake_get_high_scores_route():
+    scores = snake_get_high_scores()
+    return jsonify([{'name': row['name'], 'score': row['score']} for row in scores])
+
 @app.route('/add_score', methods=['POST'])
 def add_score_route():
     score_data = request.json
@@ -66,14 +94,34 @@ def get_high_scores_route():
     return jsonify([{'name': row['name'], 'score': row['score']} for row in scores])
 
 
+@app.route('/snake_add_score', methods=['POST'])
+def snake_add_score_route():
+    score_data = request.json
+    snake_add_score(score_data['name'], score_data['score'])
+    return jsonify({'message': 'Snake score added successfully!'}), 201
+
+@app.route('/snake_high_scores', methods=['GET'])
+def get_snake_high_scores_route():
+    scores = snake_get_high_scores()
+    return jsonify([{'name': row['name'], 'score': row['score']} for row in scores])
+
+
 @app.route('/')
 def index():
     return render_template('index.html')
+
 
 @app.route('/snake')
 def snake():
     return render_template('snake.html')
 
+
+
+@app.route('/snake_score', methods=['POST', 'GET'])
+def snake_score():
+    score_data = request.args.get('score')
+    snake_top_scores = snake_get_high_scores()
+    return render_template('snake_scoreboard.html', score_data=score_data, snake_top_scores=snake_top_scores)
 
 @app.route('/hilo')
 def hilo():
@@ -90,12 +138,12 @@ def hilo():
     errors = session['hilo_errors']
     if errors == 0:
         final_points = session['hilo_points']
-        session['hilo_points'] = 100 # reset game points
-        session['hilo_errors'] = 3 # reset errors
+        session['hilo_points'] = 100  # reset game points
+        session['hilo_errors'] = 3  # reset errors
         top_scores = get_high_scores()
         return render_template('hilo_gameover.html',
-                               points = final_points,
-                               top_scores = top_scores)
+                               points=final_points,
+                               top_scores=top_scores)
 
     while True:
         number_first = random.randint(1,10)
@@ -105,9 +153,9 @@ def hilo():
 
     return render_template('hilo.html',
                            points=points,
-                           errors = errors,
-                           number_first = number_first,
-                           number_second = number_second)
+                           errors=errors,
+                           number_first=number_first,
+                           number_second=number_second)
 
 
 @app.route('/hilo_guess', methods=['POST'])
@@ -130,9 +178,9 @@ def hilo_guess():
         session['hilo_errors'] -= 1
 
     return render_template('hilo_result.html',
-                           number_first = number_first,
-                           number_second = number_second,
-                           result = result)
+                           number_first=number_first,
+                           number_second=number_second,
+                           result=result)
 
 def get_wordle_scores():
     conn = get_db_connection()
