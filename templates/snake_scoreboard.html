@@ -1,11 +1,11 @@
 {% extends "layout.html" %}
 
-{% block title %}GAME OVER{% endblock %}
+{% block title %}Snakes Scoreboard{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
+    <div class="container mt-5">
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h1>GAME OVER</h1>
+        <h1>Snake Scoreboard</h1>
         <div class="alert alert-info p-2" role="alert">
             Points = {{ score_data }}
             <input type="hidden" name="Points" value="{{ score_data }}" id="score">
@@ -57,7 +57,7 @@
                 console.error('Error:', error);
             });
         });
-        </script>
+    </script>
 
     <a href="{{ url_for('snake') }}" class="btn btn-primary">Start New Game</a>
 

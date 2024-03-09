@@ -11,57 +11,57 @@
       color: maroon;
       text-align: center;
       left: 50%;
-        }
+    }
 
-        .play-button {
-            position: absolute; /* Set the position to absolute */
-            top: 82%; /* Position from the top */
-            left: 50%; /* Position from the left */
-            transform: translate(-50%, -50%); /* Center the button */
-        }
+    .play-button {
+        position: absolute; /* Set the position to absolute */
+        top: 82%; /* Position from the top */
+        left: 50%; /* Position from the left */
+        transform: translate(-50%, -50%); /* Center the button */
+    }
 
-        .scoreboard {
+    .scoreboard {
+        position: absolute;
+        top: 88%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    .flex-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+    }
+    .game-container {
+        width: 400px;
+        height: 400px;
+        border: 1px solid black;
+        position: relative;
+    }
+    .snake-segment {
+        width: 20px;
+        height: 20px;
+        background-color: green;
+        position: absolute;
+    }
+    .food {
+        width: 20px;
+        height: 20px;
+        background-color: red;
+        position: absolute;
+    }
+
+    #score {
+          font-family: Verdana;
+          font-size: 20px;
+          font-weight: bold;
+          color: Green;
+            padding: 10px;
+          text-align: left;
             position: absolute;
-            top: 88%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-        }
-
-        .flex-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100%;
-        }
-        .game-container {
-            width: 400px;
-            height: 400px;
-            border: 1px solid black;
-            position: relative;
-        }
-        .snake-segment {
-            width: 20px;
-            height: 20px;
-            background-color: green;
-            position: absolute;
-        }
-        .food {
-            width: 20px;
-            height: 20px;
-            background-color: red;
-            position: absolute;
-        }
-
-        #score {
-              font-family: Verdana;
-              font-size: 20px;
-              font-weight: bold;
-              color: Green;
-                padding: 10px;
-              text-align: left;
-                position: absolute;
-                top: 10px;
-               right: 10px;
+            top: 10px;
+           right: 10px;
     }
     </style>
 {% endblock head %}
