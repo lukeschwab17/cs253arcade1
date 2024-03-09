@@ -21,7 +21,15 @@ def init_db():
             id INTEGER PRIMARY KEY, 
             name TEXT, 
             score INTEGER
-        )
+            
+        ); 
+    ''')
+    db.execute('''
+    CREATE TABLE IF NOT EXISTS snake_scores (
+            id INTEGER PRIMARY KEY, 
+            name TEXT, 
+            score INTEGER
+        );
     ''')
     db.commit()
     db.close()
@@ -46,6 +54,26 @@ def get_high_scores(limit=10):
     return scores
 
 
+def snake_add_score(name, score):
+    conn = get_db_connection()
+    conn.execute('INSERT INTO snake_scores (name, score) VALUES (?, ?)', (name, score))
+    conn.commit()
+    conn.close()
+
+
+def snake_get_high_scores(limit=10):
+    conn = get_db_connection()
+    scores = conn.execute('SELECT name, MAX(score) AS score FROM snake_scores GROUP BY name ORDER BY MAX(score) DESC LIMIT ?', (limit,)).fetchall()
+    conn.close()
+    return scores
+
+
+@app.route('/snake_high_scores', methods=['GET'])
+def snake_get_high_scores_route():
+    scores = snake_get_high_scores()
+    return jsonify([{'name': row['name'], 'score': row['score']} for row in scores])
+
+
 @app.route('/add_score', methods=['POST'])
 def add_score_route():
     score_data = request.json
@@ -59,6 +87,18 @@ def get_high_scores_route():
     return jsonify([{'name': row['name'], 'score': row['score']} for row in scores])
 
 
+@app.route('/snake_add_score', methods=['POST'])
+def snake_add_score_route():
+    score_data = request.json
+    snake_add_score(score_data['name'], score_data['score'])
+    return jsonify({'message': 'Snake score added successfully!'}), 201
+
+@app.route('/snake_high_scores', methods=['GET'])
+def get_snake_high_scores_route():
+    scores = snake_get_high_scores()
+    return jsonify([{'name': row['name'], 'score': row['score']} for row in scores])
+
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -68,8 +108,12 @@ def index():
 def snake():
     return render_template('snake.html')
 
+
+@app.route('/snake_score', methods=['POST', 'GET'])
 def snake_score():
-    return render_template('snake.html', score=score)
+    score_data = request.args.get('score')
+    snake_top_scores = snake_get_high_scores()
+    return render_template('snake_scoreboard.html', score_data=score_data, snake_top_scores=snake_top_scores)
 
 
 @app.route('/hilo')

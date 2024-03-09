@@ -5,7 +5,7 @@
     <title>Snake</title>
     <style>
 
-        #game-over {
+    #game-over {
       font-size: 30px;
       font-weight: bold;
       color: maroon;
@@ -18,6 +18,13 @@
             top: 82%; /* Position from the top */
             left: 50%; /* Position from the left */
             transform: translate(-50%, -50%); /* Center the button */
+        }
+
+        .scoreboard {
+            position: absolute;
+            top: 88%;
+            left: 50%;
+            transform: translate(-50%, -50%);
         }
 
         .flex-container {
@@ -62,6 +69,7 @@
 {% block content %}
     <div class="flex-container">
     <div id="gameContainer" class="game-container"></div>
+    <div id="score"> Score: {{ score }} </div>
 
     <script>
         let loop;
@@ -99,7 +107,6 @@
         }
 
         function updateScore () {
-            const showScore = document.getElementById('score');
             showScore.textContent = 'score: ' + score;
         }
 
@@ -126,7 +133,7 @@
                     window.location.href = '/';
                 }
             */
-
+                document.getElementById('snake_score_id').value = score;
                 document.getElementById ( 'game-over' ).style.display = 'block';
                 clearInterval ( loop );
                 return;
@@ -136,6 +143,7 @@
             snake.unshift ( newHead );
 
             if (snake[0].x === food.x && snake[0].y === food.y) {
+                increaseScore()
                 placeFood ();
             } else {
                 snake.pop ();
@@ -151,6 +159,7 @@
             // Reset food position
             placeFood();
             // Reset direction
+            resetScore()
             direction = {x: 0, y: -20};
             // Reset any other game state variables, such as score or errors, if applicable
 
@@ -200,17 +209,28 @@
             } else {
                 first_round = false;
             }
-
             loop = setInterval( update, 100 );
-
             return true
         }
 
     </script>
-    <button class="play-button" onclick= "play()">Play</button>
+
+    <button id="button1" class="play-button" onclick= "play()">Play</button>
+        <form action="{{ url_for('snake_score') }}" method="get">
+            <input type="hidden" name="score" value="score" id="snake_score_id">
+            <button id="button2" class="scoreboard" type="submit" disabled>Submit Score</button>
+        </form>
+
+    <script>
+        const button1 = document.getElementById('button1');
+        const button2 = document.getElementById('button2');
+
+        button1.addEventListener('click', function() {
+            button2.disabled = false;
+        });
+    </script>
     </div>
-     <div id="score"> Score: {{ score }} </div>
-     <div id="game-over" style="display: none;">Game Over! </div>
+    <div id="game-over" style="display: none;">Game Over! </div>
 
 
 {% endblock content%}
